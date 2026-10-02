@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Cadence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/cadence.css">
+<meta name="theme-color" content="#0A0C10">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Cadence">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="js/theme.js"></script>
+</head>
+<body class="gated">
+
+<div class="gate" id="authGate">
+  <div class="gate-brand"><div class="brand-mark">C</div><div class="wordmark">Cadence</div></div>
+
+  <form class="gate-card" id="signInForm" novalidate hidden>
+    <h2>Sign in</h2>
+    <div class="field">
+      <label for="signInEmail">Email</label>
+      <input type="email" id="signInEmail" autocomplete="username" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="signInPassword">Password</label>
+      <input type="password" id="signInPassword" autocomplete="current-password">
+    </div>
+    <div class="form-error" id="signInError" hidden></div>
+    <button type="submit" class="save-btn" id="signInSubmit">Sign in</button>
+    <button type="button" class="link-btn" data-gate="forgotForm">Forgot password?</button>
+    <button type="button" class="link-btn" data-gate="signUpForm">New here? Create an account</button>
+  </form>
+
+  <form class="gate-card" id="signUpForm" novalidate hidden>
+    <h2>Create your account</h2>
+    <div class="field">
+      <label for="signUpCode">Invite code</label>
+      <input type="text" id="signUpCode" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8" placeholder="6 letters and numbers">
+      <div class="hint" id="signUpCodeHint">Cadence is invite-only. Ask your partner, or whoever invited you, for a code.</div>
+    </div>
+    <div class="field">
+      <label for="signUpEmail">Email</label>
+      <input type="email" id="signUpEmail" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label for="signUpPassword">Password</label>
+      <input type="password" id="signUpPassword" autocomplete="new-password" placeholder="At least 8 characters">
+    </div>
+    <div class="form-error" id="signUpError" hidden></div>
+    <button type="submit" class="save-btn" id="signUpSubmit">Create account</button>
+    <button type="button" class="link-btn" data-gate="signInForm">Already have an account? Sign in</button>
+  </form>
+
+  <form class="gate-card" id="forgotForm" novalidate hidden>
+    <h2>Reset your password</h2>
+    <p class="sheet-text">We’ll email you a link to choose a new one.</p>
+    <div class="field">
+      <label for="forgotEmail">Email</label>
+      <input type="email" id="forgotEmail" autocomplete="username" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="form-error" id="forgotError" hidden></div>
+    <button type="submit" class="save-btn" id="forgotSubmit">Send reset link</button>
+    <button type="button" class="link-btn" data-gate="signInForm">Back to sign in</button>
+  </form>
+
+  <div class="gate-card" id="checkEmail" hidden>
+    <h2>Check your email</h2>
+    <p class="sheet-text" id="checkEmailText"></p>
+    <button type="button" class="secondary-btn" data-gate="signInForm">Back to sign in</button>
+  </div>
+</div>
+
+<div class="onboarding" id="onboarding" hidden></div>
+
+<header id="appHeader">
+  <div class="title-row">
+    <span></span>
+    <div class="brand"><div class="brand-mark">C</div><div class="wordmark" id="screenTitle">Cadence</div></div>
+    <button class="gear" id="openSettings" aria-label="Settings">⚙</button>
+  </div>
+  <div class="period">
+    <button id="prevPeriod" aria-label="Previous period">‹</button>
+    <div class="label" id="periodLabel" role="button" tabindex="0" title="Jump to the current period">Loading…</div>
+    <button id="nextPeriod" aria-label="Next period">›</button>
+  </div>
+</header>
+
+<main>
+  <div class="screen active" id="screen-overview">
+    <div class="welcome-card" id="welcomeCard" hidden></div>
+    <div class="cards" id="categoryCards"></div>
+    <div class="summary-card" style="margin-top:14px;">
+      <h3>Recent activity</h3>
+      <div id="recentList"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-bills">
+    <div class="fixed-card" id="billsCard"></div>
+  </div>
+
+  <div class="screen" id="screen-insights">
+    <div class="chips range-chips" id="rangeChips">
+      <button class="chip" data-range="3">3 months</button>
+      <button class="chip selected" data-range="6">6 months</button>
+      <button class="chip" data-range="ytd">YTD</button>
+    </div>
+    <div id="insightsBody"></div>
+  </div>
+
+  <div class="screen" id="screen-summary">
+    <div class="summary-card left-card" id="leftCard"></div>
+    <div class="summary-card" id="budgetSummary"></div>
+    <div class="summary-card" id="cardSummary"></div>
+  </div>
+</main>
+
+<button class="fab" id="openExpense" aria-label="Add expense">+</button>
+
+<nav class="tabbar">
+  <button class="tab active" data-screen="overview"><span class="ic">◔</span>Overview</button>
+  <button class="tab" data-screen="bills"><span class="ic">☑</span>Bills</button>
+  <button class="tab" data-screen="insights"><span class="ic">⤴</span>Insights</button>
+  <button class="tab" data-screen="summary"><span class="ic">≡</span>Summary</button>
+</nav>
+
+<div class="sheet-backdrop" id="expenseBackdrop">
+  <form class="sheet" id="expenseForm" novalidate>
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2 id="expenseTitle">Add expense</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <div class="field">
+      <label>Paid from</label>
+      <div class="toggle-row" id="paidFromChips">
+        <button type="button" class="chip selected" data-value="budget">Budget</button>
+        <button type="button" class="chip" data-value="savings">Savings</button>
+      </div>
+      <div class="hint" id="paidFromHint" hidden>Won’t count toward any category or Extra. It still shows in Recent activity.</div>
+    </div>
+    <div class="field" id="categoryField">
+      <label>Category</label>
+      <div class="chips" id="categoryChips"></div>
+    </div>
+    <div class="field">
+      <label for="merchantInput">Merchant</label>
+      <input type="text" id="merchantInput" maxlength="100" autocomplete="off" placeholder="e.g. Aldi or Amazon">
+      <div class="chips merchant-suggest" id="merchantSuggest"></div>
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <div class="toggle-row" id="typeChips">
+        <button type="button" class="chip selected" data-value="expense">Purchase</button>
+        <button type="button" class="chip" data-value="refund">Refund</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="amountInput">Amount</label>
+      <div class="amount-field"><span>$</span><input type="text" id="amountInput" inputmode="decimal" autocomplete="off" placeholder="45"></div>
+      <div class="hint" id="amountHint"></div>
+    </div>
+    <div class="field" id="cardField">
+      <label>Card</label>
+      <div class="chips card-row" id="cardChips"></div>
+    </div>
+    <div class="form-error" id="expenseError" hidden></div>
+    <button type="submit" class="save-btn" id="expenseSubmit">Add expense</button>
+    <button type="button" class="delete-btn" id="expenseDelete" hidden>Delete expense</button>
+  </form>
+</div>
+
+<div class="sheet-backdrop" id="settingsBackdrop">
+  <form class="sheet tall" id="settingsForm" novalidate>
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2>Settings</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <div class="scope-note" id="settingsScope"></div>
+
+    <div class="field" id="startsOnField">
+      <label for="startsOnInput">Period started</label>
+      <input type="date" id="startsOnInput">
+      <div class="hint">The day this period's pay arrived. The previous period ends the day before.</div>
+    </div>
+
+    <div class="field">
+      <label for="startingBudget">Paycheck</label>
+      <div class="amount-field"><span>$</span><input type="text" inputmode="decimal" id="startingBudget"></div>
+    </div>
+
+    <div class="section-label">Categories</div>
+    <div id="categoryRows"></div>
+    <button type="button" class="add-row-btn" id="addCategoryRow">+ Add category</button>
+
+    <div class="field" style="margin-top:18px;">
+      <label for="extraAmount">Extra</label>
+      <div class="amount-field"><span>$</span><input type="text" id="extraAmount" disabled></div>
+      <div class="hint" id="extraHint"></div>
+    </div>
+
+    <div class="section-label" id="fixedLabel">Bills</div>
+    <div class="hint section-hint" id="fixedHint"></div>
+    <div id="fixedCostRows"></div>
+    <button type="button" class="add-row-btn" id="addFixedRow">+ Add bill</button>
+
+    <div class="form-error" id="settingsError" hidden></div>
+    <button type="submit" class="save-btn" id="settingsSubmit" style="margin-top:10px;">Save settings</button>
+
+    <div class="section-label settings-group">Pay schedule</div>
+    <button type="button" class="list-card list-button" id="openSchedule">
+      <span class="grow"><span id="scheduleSummary"></span><span class="sub">Business day before on weekends and holidays</span></span><span class="chev">›</span>
+    </button>
+
+    <div class="section-label settings-group">Cards &amp; accounts</div>
+    <div class="list-card" id="cardList"></div>
+    <button type="button" class="add-row-btn" id="addCard" style="margin-top:8px;">+ Add a card or account</button>
+
+    <div class="section-label settings-group">Money</div>
+    <div class="list-card switch-card">
+      <div class="grow"><div class="switch-title">Round to whole dollars</div><div class="hint">For everyone in the household. When it’s off, amounts show cents. Amounts already saved stay as they are.</div></div>
+      <button type="button" class="switch" id="roundingSwitch" role="switch" aria-checked="true" aria-label="Round to whole dollars"></button>
+    </div>
+
+    <div class="section-label settings-group">Appearance</div>
+    <div class="toggle-row" id="appearanceChips">
+      <button type="button" class="chip" data-value="auto">Auto</button>
+      <button type="button" class="chip" data-value="light">Light</button>
+      <button type="button" class="chip" data-value="dark">Dark</button>
+    </div>
+    <div class="hint">Auto follows your phone's setting. Saved on this phone only.</div>
+
+    <div class="section-label settings-group">Store suggestions</div>
+    <button type="button" class="secondary-btn" id="openStores">Manage store suggestions</button>
+
+    <div class="section-label settings-group">Household</div>
+    <div class="household-card" id="householdInfo"></div>
+    <div id="inviteBox"></div>
+    <div id="adminBox"></div>
+
+    <div class="section-label settings-group">Account</div>
+    <button type="button" class="secondary-btn" id="openPassword">Change password</button>
+    <button type="button" class="delete-btn" id="signOutBtn">Sign out</button>
+    <button type="button" class="link-btn danger-link" id="deleteAccountBtn">Delete my account</button>
+    <div class="hint" style="text-align:center;" id="deleteAccountHint">Removes your login. If you’re the last one in the household, its budget is deleted too.</div>
+  </form>
+</div>
+
+<div class="sheet-backdrop" id="cardBackdrop">
+  <form class="sheet" id="cardForm" novalidate>
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2 id="cardTitle">Add card</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <div class="card-preview"><span class="card-badge big" id="cardPreviewBadge"></span><div><div id="cardPreviewName"></div><div class="hint" style="margin-top:2px;">Preview</div></div></div>
+    <div class="field">
+      <label for="cardName">Name</label>
+      <input type="text" id="cardName" maxlength="30" placeholder="e.g. Everyday Debit">
+    </div>
+    <div class="field">
+      <label for="cardBadge">Badge</label>
+      <input type="text" id="cardBadge" maxlength="3" autocapitalize="characters" placeholder="DB">
+      <div class="hint">Up to 3 letters, shown on the card button.</div>
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <div class="toggle-row" id="cardKindChips"></div>
+    </div>
+    <div class="field">
+      <label>Colour</label>
+      <div class="swatches" id="cardColors"></div>
+    </div>
+    <div class="form-error" id="cardError" hidden></div>
+    <button type="submit" class="save-btn" id="cardSubmit">Save</button>
+    <button type="button" class="secondary-btn" id="cardArchive" hidden>Archive this card</button>
+    <div class="hint" id="cardArchiveHint" style="text-align:center;" hidden>Archived cards leave the expense sheet; past purchases keep them.</div>
+  </form>
+</div>
+
+<div class="sheet-backdrop" id="scheduleBackdrop">
+  <form class="sheet" id="scheduleForm" novalidate>
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2>Pay schedule</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <div id="scheduleFields"></div>
+    <p class="hint" id="scheduleNote"></p>
+    <div class="form-error" id="scheduleError" hidden></div>
+    <button type="submit" class="save-btn" id="scheduleSubmit">Save</button>
+  </form>
+</div>
+
+<div class="sheet-backdrop" id="storesBackdrop">
+  <div class="sheet tall">
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2>Store suggestions</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <p class="sheet-text">As you type a store name, stores you’ve used at least twice, or in the last 30 days, are suggested. Hiding a store only stops the suggestion; its expenses and Insights don’t change.</p>
+    <div id="storesList"></div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="passwordBackdrop">
+  <form class="sheet" id="passwordForm" novalidate>
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2 id="passwordTitle">Change password</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <input type="email" id="passwordUsername" autocomplete="username" hidden>
+    <div class="field">
+      <label for="newPassword">New password</label>
+      <input type="password" id="newPassword" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="confirmPassword">Type it again</label>
+      <input type="password" id="confirmPassword" autocomplete="new-password">
+      <div class="hint">At least 8 characters. You’ll stay signed in on this phone.</div>
+    </div>
+    <div class="form-error" id="passwordError" hidden></div>
+    <button type="submit" class="save-btn" id="passwordSubmit">Change password</button>
+  </form>
+</div>
+
+<div class="sheet-backdrop" id="paydayBackdrop">
+  <form class="sheet" id="paydayForm" novalidate>
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2>New pay period?</h2><button type="button" class="sheet-close" data-close aria-label="Close">✕</button></div>
+    <p class="sheet-text"><strong id="paydayQuestion"></strong></p>
+    <p class="sheet-text" id="paydayDetail"></p>
+    <div class="field">
+      <label for="paydayDate">Pay arrived on</label>
+      <input type="date" id="paydayDate">
+    </div>
+    <div class="form-error" id="paydayError" hidden></div>
+    <button type="submit" class="save-btn" id="paydaySubmit">Start new period</button>
+    <button type="button" class="secondary-btn" id="paydayNotYet">Not yet</button>
+  </form>
+</div>
+
+<div class="toast" id="toast" role="alert" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
