@@ -355,9 +355,12 @@ header.no-period .title-row{margin-bottom:0;}
 
 /* Feel like an app: no zooming, no sideways drift. iPhones zoom in on any
    text box under 16px and stay zoomed, so every box is 16px; double-tap
-   zoom is off; sheets never scroll sideways or drag the page behind them. */
+   zoom is off; sheets never scroll sideways or drag the page behind them.
+   A long or hard press doesn't select text or pop up the copy menu, except
+   in boxes you type into. */
 html{touch-action:manipulation; overflow-x:hidden;}
-input, select, textarea{font-size:16px !important;}
+body{-webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
+input, select, textarea{font-size:16px !important; -webkit-user-select:text; user-select:text;}
 .sheet{overflow-x:hidden; overscroll-behavior:contain;}
 
 /* Sheets: a soft fade at the bottom while there's more below (see
